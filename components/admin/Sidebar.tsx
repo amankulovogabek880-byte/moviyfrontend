@@ -10,10 +10,14 @@ import {
   CreditCard,
   History,
   LogOut,
+  RotateCcw,
+  Star,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { logoutRequest } from "@/hooks/useAuth";
+import { useAdminMe } from "@/hooks/admin/useMe";
 
 const navItems = [
   { href: "/admin", label: "admin.nav.dashboard", icon: LayoutDashboard },
@@ -21,12 +25,26 @@ const navItems = [
   { href: "/admin/partners", label: "admin.nav.partners", icon: Users },
   { href: "/admin/bookings", label: "admin.nav.bookings", icon: Receipt },
   { href: "/admin/payments", label: "admin.nav.payments", icon: CreditCard },
+  { href: "/admin/refunds", label: "admin.nav.refunds", icon: RotateCcw },
+  { href: "/admin/reviews", label: "admin.nav.reviews", icon: Star },
   { href: "/admin/audit-log", label: "admin.nav.auditLog", icon: History },
 ];
+
+// §13: CONTENT_ADMIN loses financial/partner visibility, SUPER_ADMIN gains the team page.
+const contentAdminHiddenPaths = new Set(["/admin/partners", "/admin/payments", "/admin/refunds"]);
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: me } = useAdminMe();
+
+  const items = navItems
+    .filter((item) => !(me?.adminRole === "CONTENT_ADMIN" && contentAdminHiddenPaths.has(item.href)))
+    .concat(
+      me?.adminRole === "SUPER_ADMIN"
+        ? [{ href: "/admin/team", label: "admin.nav.team", icon: UserCog }]
+        : []
+    );
 
   async function handleLogout() {
     await logoutRequest();
@@ -40,7 +58,7 @@ export function Sidebar() {
         <span className="font-display text-lg font-bold text-accent">{t("admin.brand")}</span>
       </div>
       <nav className="flex-1 space-y-1 px-3">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;
           return (

@@ -11,8 +11,18 @@
  *        -> Paginated<TourListItem>
  *   GET  /public/tours/:slug -> Tour
  *   POST /public/bookings { tourDepartureId, paxCount, contact } -> { bookingNumber }
+ *     (or, for tours with price tiers/room types: { tourDepartureId, adultCount,
+ *      childCount, childAges, roomTypeId, contact } -> { bookingNumber })
  *   GET  /public/bookings/:bookingNumber -> Booking
+ *     (paxCount on the response is always adultCount + childCount, even for
+ *      advanced-mode bookings, so existing status-page rendering keeps working)
  *   POST /public/bookings/:bookingNumber/pay { amount } -> { clickCheckoutUrl }
+ *   POST /public/bookings/quote { tourDepartureId, adultCount, childCount,
+ *        childAges, roomTypeId } -> { totalAmount } — server-computed price
+ *        preview for tours with price tiers/room types configured.
+ *   GET  /public/tours/:slug/reviews -> Paginated<Review> (approved only)
+ *   POST /public/bookings/:bookingNumber/review { rating, comment } -> Review
+ *        (server rejects unless the trip has completed and no review exists yet)
  */
 import type { Tour, TourListItem, TourFilters, Paginated } from "@/types/tour";
 import type {
@@ -21,7 +31,11 @@ import type {
   CreateBookingResult,
   PayBookingInput,
   PayBookingResult,
+  QuoteBookingInput,
+  QuoteBookingResult,
 } from "@/types/booking";
+import type { Review, ReviewFormInput } from "@/types/review";
+import type { WaitlistFormInput } from "@/types/waitlist";
 
 export class ApiError extends Error {
   code: string;
@@ -96,4 +110,21 @@ export const publicApi = {
       `/public/bookings/${encodeURIComponent(bookingNumber)}/pay`,
       { method: "POST", body: JSON.stringify(input) }
     ),
+  quotePrice: (input: QuoteBookingInput) =>
+    request<QuoteBookingResult>(`/public/bookings/quote`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  getTourReviews: (slug: string) =>
+    request<Paginated<Review>>(`/public/tours/${encodeURIComponent(slug)}/reviews`),
+  submitReview: (bookingNumber: string, input: ReviewFormInput) =>
+    request<Review>(`/public/bookings/${encodeURIComponent(bookingNumber)}/review`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  joinWaitlist: (departureId: string, input: WaitlistFormInput) =>
+    request<{ ok: true }>(`/public/departures/${encodeURIComponent(departureId)}/waitlist`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
 };

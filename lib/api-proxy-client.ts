@@ -64,4 +64,5 @@ export const proxyApi = {
     proxyRequest<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined }),
   patch: <T,>(path: string, body?: unknown) =>
     proxyRequest<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
+  delete: <T,>(path: string) => proxyRequest<T>(path, { method: "DELETE" }),
 };

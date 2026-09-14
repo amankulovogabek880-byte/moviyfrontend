@@ -61,10 +61,18 @@ export function ToursTable({ tours }: { tours: B2BTourListItem[] }) {
                     )}
                   </td>
                   <td className="px-3 py-2">
-                    <PriceCell
-                      basePrice={row.tour.basePrice}
-                      discountedPrice={row.tour.discountedPrice}
-                    />
+                    {(() => {
+                      const rowBasePrice = row.departure.price ?? row.tour.basePrice;
+                      const rowDiscountedPrice =
+                        rowBasePrice * (1 - row.tour.discountPercent / 100);
+                      return (
+                        <PriceCell
+                          basePrice={rowBasePrice}
+                          discountedPrice={rowDiscountedPrice}
+                          isCustom={row.tour.hasCustomDiscount}
+                        />
+                      );
+                    })()}
                   </td>
                   <td className="px-3 py-2 text-right">
                     <Button

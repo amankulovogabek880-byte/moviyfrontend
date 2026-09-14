@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BookingsTable } from "@/components/b2b/BookingsTable";
+import { DownloadLink } from "@/components/shared/DownloadLink";
 import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { Select } from "@/components/shared/Select";
@@ -32,18 +33,25 @@ export default function B2BBookingsPage() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">{t("b2b.bookings.title")}</h1>
-        <Select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as BookingStatus | "")}
-          className="w-56"
-        >
-          <option value="">{t("common.all")}</option>
-          {statuses.map((s) => (
-            <option key={s} value={s}>
-              {t(`bookingStatus.${s}`)}
-            </option>
-          ))}
-        </Select>
+        <div className="flex items-center gap-3">
+          <Select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as BookingStatus | "")}
+            className="w-56"
+          >
+            <option value="">{t("common.all")}</option>
+            {statuses.map((s) => (
+              <option key={s} value={s}>
+                {t(`bookingStatus.${s}`)}
+              </option>
+            ))}
+          </Select>
+          <DownloadLink
+            path={`b2b/bookings/export${status ? `?status=${status}` : ""}`}
+          >
+            {t("b2b.bookings.exportExcel")}
+          </DownloadLink>
+        </div>
       </div>
       {isLoading ? (
         <Skeleton className="h-96 w-full rounded-xl2" />

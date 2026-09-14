@@ -5,6 +5,9 @@ import { useState } from "react";
 import { Gallery } from "@/components/b2c/Gallery";
 import { DepartureList } from "@/components/b2c/DepartureList";
 import { BookingContactForm } from "@/components/b2c/BookingContactForm";
+import { TravelerBookingForm } from "@/components/b2c/TravelerBookingForm";
+import { WaitlistForm } from "@/components/b2c/WaitlistForm";
+import { ReviewsSection } from "@/components/b2c/ReviewsSection";
 import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { Button } from "@/components/shared/Button";
@@ -13,7 +16,7 @@ import { useCreateBooking } from "@/hooks/b2c/useBooking";
 import { t } from "@/lib/i18n";
 import { formatUsd } from "@/lib/utils";
 import { ApiError } from "@/lib/api-client";
-import type { BookingContactFormValues } from "@/lib/schemas/booking";
+import type { BookingContactFormValues, TravelerBookingFormValues } from "@/lib/schemas/booking";
 
 export default function TourDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -44,8 +47,10 @@ export default function TourDetailPage() {
   }
 
   const selectedDeparture = tour.departures.find((d) => d.id === selectedDepartureId) ?? null;
+  const hasPricingOptions =
+    (tour.priceTiers?.length ?? 0) > 0 || (tour.roomTypes?.length ?? 0) > 0;
 
-  async function handleSubmit(values: BookingContactFormValues) {
+  async function handleSimpleSubmit(values: BookingContactFormValues) {
     if (!selectedDeparture) return;
     if (values.paxCount > selectedDeparture.remainingSeats) {
       setFormError(t("b2c.tourDetail.notEnoughSeats"));
@@ -56,6 +61,30 @@ export default function TourDetailPage() {
       const result = await createBooking.mutateAsync({
         tourDepartureId: selectedDeparture.id,
         paxCount: values.paxCount,
+        addOnIds: values.addOnIds,
+        contact: { fullName: values.fullName, phone: values.phone, email: values.email },
+      });
+      router.push(`/booking/${result.bookingNumber}`);
+    } catch (e) {
+      setFormError(e instanceof ApiError ? e.message : t("common.networkError"));
+    }
+  }
+
+  async function handleAdvancedSubmit(values: TravelerBookingFormValues) {
+    if (!selectedDeparture) return;
+    if (values.adultCount + values.childCount > selectedDeparture.remainingSeats) {
+      setFormError(t("b2c.tourDetail.notEnoughSeats"));
+      return;
+    }
+    setFormError(null);
+    try {
+      const result = await createBooking.mutateAsync({
+        tourDepartureId: selectedDeparture.id,
+        adultCount: values.adultCount,
+        childCount: values.childCount,
+        childAges: values.childAges,
+        roomTypeId: values.roomTypeId || undefined,
+        addOnIds: values.addOnIds,
         contact: { fullName: values.fullName, phone: values.phone, email: values.email },
       });
       router.push(`/booking/${result.bookingNumber}`);
@@ -92,6 +121,8 @@ export default function TourDetailPage() {
               </ol>
             </div>
           )}
+
+          <ReviewsSection slug={tour.slug} />
         </div>
 
         <div className="h-fit rounded-xl2 border border-border p-5">
@@ -103,6 +134,7 @@ export default function TourDetailPage() {
           <h3 className="mb-2 text-sm font-semibold">{t("b2c.tourDetail.departures")}</h3>
           <DepartureList
             departures={tour.departures}
+            basePrice={tour.basePrice}
             selectedId={selectedDepartureId}
             onSelect={(id) => {
               setSelectedDepartureId(id);
@@ -114,11 +146,24 @@ export default function TourDetailPage() {
           {showForm && selectedDeparture && (
             <div className="mt-6 border-t border-border pt-6">
               {formError && <p className="mb-3 text-sm text-danger">{formError}</p>}
-              <BookingContactForm
-                maxPax={selectedDeparture.remainingSeats}
-                isSubmitting={createBooking.isPending}
-                onSubmit={handleSubmit}
-              />
+              {selectedDeparture.remainingSeats <= 0 ? (
+                <WaitlistForm departureId={selectedDeparture.id} />
+              ) : hasPricingOptions ? (
+                <TravelerBookingForm
+                  departureId={selectedDeparture.id}
+                  roomTypes={tour.roomTypes ?? []}
+                  addOns={tour.addOns ?? []}
+                  isSubmitting={createBooking.isPending}
+                  onSubmit={handleAdvancedSubmit}
+                />
+              ) : (
+                <BookingContactForm
+                  maxPax={selectedDeparture.remainingSeats}
+                  addOns={tour.addOns ?? []}
+                  isSubmitting={createBooking.isPending}
+                  onSubmit={handleSimpleSubmit}
+                />
+              )}
             </div>
           )}
 

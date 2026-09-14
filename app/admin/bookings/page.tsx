@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AdminBookingsTable } from "@/components/admin/AdminBookingsTable";
+import { DownloadLink } from "@/components/shared/DownloadLink";
 import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { Select } from "@/components/shared/Select";
@@ -57,6 +58,17 @@ export default function AdminBookingsPage() {
               </option>
             ))}
           </Select>
+          <DownloadLink
+            path={`admin/bookings/export${
+              status || channel
+                ? `?${[status && `status=${status}`, channel && `channel=${channel}`]
+                    .filter(Boolean)
+                    .join("&")}`
+                : ""
+            }`}
+          >
+            {t("admin.bookings.exportExcel")}
+          </DownloadLink>
         </div>
       </div>
       {isLoading ? (

@@ -1,10 +1,15 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { PartnerForm } from "@/components/admin/PartnerForm";
+import { PartnerTourDiscountsEditor } from "@/components/admin/PartnerTourDiscountsEditor";
+import { PartnerPaymentTermsForm } from "@/components/admin/PartnerPaymentTermsForm";
+import { PartnerUsersEditor } from "@/components/admin/PartnerUsersEditor";
 import { BookingsTable } from "@/components/b2b/BookingsTable";
 import { Button } from "@/components/shared/Button";
+import { DownloadLink } from "@/components/shared/DownloadLink";
 import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
 import {
@@ -67,15 +72,27 @@ export default function AdminPartnerDetailPage() {
         <h1 className="text-2xl font-bold">
           {isNew ? t("admin.partnerForm.titleNew") : t("admin.partnerForm.titleEdit")}
         </h1>
-        {!isNew && partner && (
-          <Button
-            variant={partner.isActive ? "danger" : "secondary"}
-            isLoading={setActive.isPending}
-            onClick={() => setActive.mutate(!partner.isActive)}
-          >
-            {partner.isActive ? t("admin.partnerForm.suspend") : t("admin.partnerForm.activate")}
-          </Button>
-        )}
+        <div className="flex items-center gap-3">
+          {!isNew && (
+            <Link href={`/admin/partners/${params.id}/statement`} className="text-sm text-accent hover:underline">
+              {t("admin.partnerForm.statementLink")}
+            </Link>
+          )}
+          {!isNew && (
+            <DownloadLink path={`admin/partners/${params.id}/contract`}>
+              {t("admin.partnerForm.contractButton")}
+            </DownloadLink>
+          )}
+          {!isNew && partner && (
+            <Button
+              variant={partner.isActive ? "danger" : "secondary"}
+              isLoading={setActive.isPending}
+              onClick={() => setActive.mutate(!partner.isActive)}
+            >
+              {partner.isActive ? t("admin.partnerForm.suspend") : t("admin.partnerForm.activate")}
+            </Button>
+          )}
+        </div>
       </div>
       {error && <p className="text-sm text-danger">{error}</p>}
       {saved && <p className="text-sm text-success">{t("admin.tourForm.savedSuccess")}</p>}
@@ -85,6 +102,11 @@ export default function AdminPartnerDetailPage() {
         isSubmitting={createPartner.isPending || updatePartner.isPending}
         onSubmit={handleSubmit}
       />
+      {!isNew && partner && <PartnerPaymentTermsForm partner={partner} />}
+      {!isNew && partner && (
+        <PartnerTourDiscountsEditor partnerId={partner.id} tourDiscounts={partner.tourDiscounts ?? []} />
+      )}
+      {!isNew && partner && <PartnerUsersEditor partnerId={partner.id} users={partner.users ?? []} />}
       {!isNew && (
         <div>
           <h2 className="mb-3 text-lg font-semibold">{t("admin.partnerForm.bookingHistory")}</h2>

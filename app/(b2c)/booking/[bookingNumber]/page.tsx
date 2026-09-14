@@ -10,7 +10,7 @@ import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { useBooking } from "@/hooks/b2c/useBooking";
 import { t } from "@/lib/i18n";
-import { formatDate, formatUsd, remainingBalance } from "@/lib/utils";
+import { formatDate, formatUsd, isTripCompleted, remainingBalance } from "@/lib/utils";
 import { ApiError } from "@/lib/api-client";
 
 export default function BookingStatusPage() {
@@ -63,6 +63,23 @@ export default function BookingStatusPage() {
           </p>
         </div>
 
+        {booking.priceBreakdown && booking.priceBreakdown.length > 0 && (
+          <div className="mt-6 border-t border-border pt-6">
+            <div className="flex flex-col gap-1 text-sm">
+              {booking.priceBreakdown.map((item, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <span className="text-muted">{item.label}</span>
+                  <span>{formatUsd(item.amount)}</span>
+                </div>
+              ))}
+              <div className="mt-1 flex items-center justify-between border-t border-border pt-1 font-semibold">
+                <span>{t("b2c.booking.totalAmount")}</span>
+                <span>{formatUsd(booking.totalAmount)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="mt-6 grid grid-cols-3 gap-3 border-t border-border pt-6 text-center">
           <div>
             <p className="text-xs text-muted">{t("b2c.booking.totalAmount")}</p>
@@ -95,13 +112,21 @@ export default function BookingStatusPage() {
         )}
 
         {booking.status === "PAID" && (
-          <div className="mt-6 border-t border-border pt-6 text-center">
+          <div className="mt-6 flex flex-col items-center gap-2 border-t border-border pt-6 text-center">
             <Link
               href={`/booking/${booking.bookingNumber}/success`}
               className="text-accent hover:underline"
             >
               {t("b2c.success.viewBooking")}
             </Link>
+            {isTripCompleted(booking) && (
+              <Link
+                href={`/booking/${booking.bookingNumber}/review`}
+                className="text-accent hover:underline"
+              >
+                {t("b2c.reviews.leaveReviewLink")}
+              </Link>
+            )}
           </div>
         )}
       </div>

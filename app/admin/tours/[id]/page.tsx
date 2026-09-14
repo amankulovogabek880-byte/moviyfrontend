@@ -4,6 +4,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { TourForm } from "@/components/admin/TourForm";
 import { DepartureEditor } from "@/components/admin/DepartureEditor";
+import { PriceTiersEditor, RoomTypesEditor } from "@/components/admin/PricingOptionsEditor";
+import { AddOnsEditor } from "@/components/admin/AddOnsEditor";
+import { TourVisibilityEditor } from "@/components/admin/TourVisibilityEditor";
 import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { useAdminTour, useCreateTour, useUpdateTour } from "@/hooks/admin/useTours";
@@ -67,6 +70,12 @@ export default function AdminTourEditPage() {
         onSubmit={handleSubmit}
       />
       {!isNew && tour && <DepartureEditor tourId={tour.id} departures={tour.departures} />}
+      {!isNew && tour && (
+        <PriceTiersEditor tourId={tour.id} priceTiers={tour.priceTiers ?? []} />
+      )}
+      {!isNew && tour && <RoomTypesEditor tourId={tour.id} roomTypes={tour.roomTypes ?? []} />}
+      {!isNew && tour && <AddOnsEditor tourId={tour.id} addOns={tour.addOns ?? []} />}
+      {!isNew && tour && <TourVisibilityEditor tour={tour} />}
     </div>
   );
 }

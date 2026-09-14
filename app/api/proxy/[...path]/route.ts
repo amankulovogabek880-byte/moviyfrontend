@@ -41,11 +41,16 @@ async function handle(req: NextRequest, params: { path: string[] }) {
     return res;
   }
 
-  const text = await backendRes.text();
-  return new NextResponse(text || null, {
+  // Binary-safe passthrough (JSON survives this unchanged; PDF/Excel document
+  // downloads — see §6 — need the raw bytes rather than a text() decode/encode
+  // roundtrip, which corrupts non-UTF8 binary content).
+  const buffer = await backendRes.arrayBuffer();
+  const contentDisposition = backendRes.headers.get("Content-Disposition");
+  return new NextResponse(buffer.byteLength ? buffer : null, {
     status: backendRes.status,
     headers: {
       "Content-Type": backendRes.headers.get("Content-Type") ?? "application/json",
+      ...(contentDisposition ? { "Content-Disposition": contentDisposition } : {}),
     },
   });
 }

@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { publicApi } from "@/lib/api-client";
-import type { CreateBookingInput, PayBookingInput } from "@/types/booking";
+import type { CreateBookingInput, PayBookingInput, QuoteBookingInput } from "@/types/booking";
+import type { ReviewFormInput } from "@/types/review";
+import type { WaitlistFormInput } from "@/types/waitlist";
 
 export function useBooking(bookingNumber: string) {
   return useQuery({
@@ -17,6 +19,15 @@ export function useCreateBooking() {
   });
 }
 
+export function useBookingQuote(input: QuoteBookingInput, enabled: boolean) {
+  return useQuery({
+    queryKey: ["b2c", "bookingQuote", input],
+    queryFn: () => publicApi.quotePrice(input),
+    enabled,
+    staleTime: 0,
+  });
+}
+
 export function usePayBooking(bookingNumber: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -24,5 +35,17 @@ export function usePayBooking(bookingNumber: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["b2c", "booking", bookingNumber] });
     },
+  });
+}
+
+export function useSubmitReview(bookingNumber: string) {
+  return useMutation({
+    mutationFn: (input: ReviewFormInput) => publicApi.submitReview(bookingNumber, input),
+  });
+}
+
+export function useJoinWaitlist(departureId: string) {
+  return useMutation({
+    mutationFn: (input: WaitlistFormInput) => publicApi.joinWaitlist(departureId, input),
   });
 }

@@ -26,6 +26,37 @@ export type TourFormValues = z.infer<typeof tourFormSchema>;
 export const departureFormSchema = z.object({
   date: z.string().min(1, "Sana talab qilinadi"),
   totalSeats: z.number().min(1, "Kamida 1 joy"),
+  price: z.number().min(0, "Narx manfiy bo'lishi mumkin emas").optional(),
 });
 
 export type DepartureFormValues = z.infer<typeof departureFormSchema>;
+
+export const departurePriceUpdateSchema = z.object({
+  price: z.number().min(0, "Narx manfiy bo'lishi mumkin emas").optional(),
+});
+
+export type DeparturePriceUpdateValues = z.infer<typeof departurePriceUpdateSchema>;
+
+export const priceTierFormSchema = z.object({
+  type: z.enum(["ADULT", "CHILD"]),
+  label: z.string().min(1, "Talab qilinadi"),
+  percentOfBase: z.number().min(0, "0 dan katta bo'lishi kerak").max(500),
+  ageFrom: z.number().min(0).optional(),
+  ageTo: z.number().min(0).optional(),
+});
+
+export type PriceTierFormValues = z.infer<typeof priceTierFormSchema>;
+
+export const roomTypeFormSchema = z.object({
+  name: z.string().min(1, "Talab qilinadi"),
+  extraAmount: z.number().min(0, "0 dan katta bo'lishi kerak"),
+});
+
+export type RoomTypeFormValues = z.infer<typeof roomTypeFormSchema>;
+
+export const addOnFormSchema = z.object({
+  name: z.string().min(1, "Talab qilinadi"),
+  price: z.number().min(0, "0 dan katta bo'lishi kerak"),
+});
+
+export type AddOnFormValues = z.infer<typeof addOnFormSchema>;

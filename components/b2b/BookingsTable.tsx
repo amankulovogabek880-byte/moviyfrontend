@@ -21,6 +21,7 @@ export function BookingsTable({ bookings }: { bookings: Booking[] }) {
             <th className="px-3 py-2">{t("b2b.bookings.colStatus")}</th>
             <th className="px-3 py-2">{t("b2b.bookings.colTotal")}</th>
             <th className="px-3 py-2">{t("b2b.bookings.colPaid")}</th>
+            <th className="px-3 py-2">{t("b2b.bookings.colCreatedBy")}</th>
           </tr>
         </thead>
         <tbody>
@@ -41,6 +42,7 @@ export function BookingsTable({ bookings }: { bookings: Booking[] }) {
               </td>
               <td className="px-3 py-2">{formatUsd(b.totalAmount)}</td>
               <td className="px-3 py-2">{formatUsd(b.paidAmount)}</td>
+              <td className="px-3 py-2 text-muted">{b.createdByName ?? "—"}</td>
             </tr>
           ))}
         </tbody>

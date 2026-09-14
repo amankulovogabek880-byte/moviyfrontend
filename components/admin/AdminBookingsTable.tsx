@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { formatUsd, remainingBalance } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { Badge } from "@/components/shared/Badge";
@@ -46,6 +47,12 @@ export function AdminBookingsTable({ bookings }: { bookings: Booking[] }) {
                 <td className="px-3 py-2">{formatUsd(b.totalAmount)}</td>
                 <td className="px-3 py-2">{formatUsd(remainingBalance(b))}</td>
                 <td className="px-3 py-2 text-right">
+                  <Link
+                    href={`/admin/bookings/${b.id}`}
+                    className="mr-2 text-sm text-accent hover:underline"
+                  >
+                    {t("admin.bookings.viewDetails")}
+                  </Link>
                   {b.status !== "PAID" && b.status !== "CANCELLED" && (
                     <Button
                       size="sm"

@@ -63,3 +63,7 @@ export function pad2(n: number): string {
 export function remainingBalance(booking: { totalAmount: number; paidAmount: number }): number {
   return Math.max(0, booking.totalAmount - booking.paidAmount);
 }
+
+export function isTripCompleted(booking: { status: string; departure: { date: string } }): boolean {
+  return booking.status === "PAID" && new Date(booking.departure.date).getTime() < Date.now();
+}

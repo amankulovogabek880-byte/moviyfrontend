@@ -4,7 +4,13 @@ import { t } from "@/lib/i18n";
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { TourListItem } from "@/types/tour";
 
-export function AdminToursTable({ tours }: { tours: TourListItem[] }) {
+export function AdminToursTable({
+  tours,
+  readOnly,
+}: {
+  tours: TourListItem[];
+  readOnly?: boolean;
+}) {
   if (tours.length === 0) return <EmptyState message={t("common.noResults")} />;
 
   return (
@@ -22,12 +28,16 @@ export function AdminToursTable({ tours }: { tours: TourListItem[] }) {
           {tours.map((tour) => (
             <tr key={tour.id} className="border-t border-border hover:bg-surface/50">
               <td className="px-4 py-3">
-                <Link
-                  href={`/admin/tours/${tour.id}`}
-                  className="font-medium text-accent hover:underline"
-                >
-                  {tour.title}
-                </Link>
+                {readOnly ? (
+                  <span className="font-medium">{tour.title}</span>
+                ) : (
+                  <Link
+                    href={`/admin/tours/${tour.id}`}
+                    className="font-medium text-accent hover:underline"
+                  >
+                    {tour.title}
+                  </Link>
+                )}
               </td>
               <td className="px-4 py-3 text-muted">{tour.destination}</td>
               <td className="px-4 py-3">{formatUsd(tour.basePrice)}</td>

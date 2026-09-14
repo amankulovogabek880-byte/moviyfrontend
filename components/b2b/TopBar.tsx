@@ -6,6 +6,7 @@ import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { logoutRequest } from "@/hooks/useAuth";
+import { useB2BMe } from "@/hooks/b2b/useMe";
 
 const navItems = [
   { href: "/b2b", label: "b2b.nav.dashboard" },
@@ -16,6 +17,11 @@ const navItems = [
 export function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: me } = useB2BMe();
+  const items =
+    me?.partnerUserRole === "OWNER"
+      ? [...navItems, { href: "/b2b/team", label: "b2b.nav.team" }]
+      : navItems;
 
   async function handleLogout() {
     await logoutRequest();
@@ -29,7 +35,7 @@ export function TopBar() {
         <div className="flex items-center gap-6">
           <span className="text-sm font-bold">{t("b2b.brand")}</span>
           <nav className="flex items-center gap-4 text-sm">
-            {navItems.map((item) => (
+            {items.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

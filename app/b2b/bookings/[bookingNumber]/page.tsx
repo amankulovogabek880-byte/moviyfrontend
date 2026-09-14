@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CountdownTimer } from "@/components/b2c/CountdownTimer";
 import { PaySection } from "@/components/b2c/PaySection";
 import { BookingStatusBadge } from "@/components/shared/BookingStatusBadge";
+import { DownloadLink } from "@/components/shared/DownloadLink";
 import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { useB2BBooking } from "@/hooks/b2b/useBookings";
@@ -34,7 +35,10 @@ export default function B2BBookingDetailPage() {
     );
   }
 
-  const canPay = booking.status === "PENDING_PAYMENT" || booking.status === "PARTIALLY_PAID";
+  const isPostpaid = booking.paymentType === "POSTPAID";
+  const canPay =
+    !isPostpaid && (booking.status === "PENDING_PAYMENT" || booking.status === "PARTIALLY_PAID");
+  const showPostpaidNotice = isPostpaid && booking.status === "PENDING_PAYMENT";
 
   return (
     <div className="max-w-2xl">
@@ -69,6 +73,19 @@ export default function B2BBookingDetailPage() {
             <p className="font-semibold">{formatUsd(remainingBalance(booking))}</p>
           </div>
         </div>
+
+        <div className="mt-6 border-t border-border pt-6">
+          <DownloadLink path={`b2b/bookings/${booking.bookingNumber}/invoice`}>
+            {t("admin.bookingDetail.invoiceButton")}
+          </DownloadLink>
+        </div>
+
+        {showPostpaidNotice && (
+          <div className="mt-6 rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm">
+            <p className="font-semibold text-accent">{t("b2b.bookingDetail.postpaidNoticeTitle")}</p>
+            <p className="mt-1 text-muted">{t("b2b.bookingDetail.postpaidNotice")}</p>
+          </div>
+        )}
 
         {canPay && (
           <div className="mt-6 flex flex-col gap-4 border-t border-border pt-6">

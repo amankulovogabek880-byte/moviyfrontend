@@ -3,6 +3,37 @@ export interface TourDeparture {
   date: string;
   totalSeats: number;
   remainingSeats: number;
+  price?: number | null;
+  waitlistCount?: number;
+}
+
+export interface PriceTier {
+  id: string;
+  type: "ADULT" | "CHILD";
+  label: string;
+  percentOfBase: number;
+  ageFrom?: number;
+  ageTo?: number;
+}
+
+export interface RoomType {
+  id: string;
+  name: string;
+  extraAmount: number;
+}
+
+export type TourVisibility = "ALL_PARTNERS" | "SELECTED_PARTNERS";
+
+export interface AddOn {
+  id: string;
+  name: string;
+  price: number;
+  isActive: boolean;
+}
+
+export interface AddOnFormInput {
+  name: string;
+  price: number;
 }
 
 export interface TourImage {
@@ -31,6 +62,11 @@ export interface Tour {
   durationDays: number;
   departures: TourDeparture[];
   isFeatured?: boolean;
+  priceTiers?: PriceTier[];
+  roomTypes?: RoomType[];
+  addOns?: AddOn[];
+  visibility?: TourVisibility;
+  visiblePartnerIds?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -51,6 +87,7 @@ export interface B2BTourListItem extends TourListItem {
   discountPercent: number;
   discountedPrice: number;
   departures: TourDeparture[];
+  hasCustomDiscount?: boolean;
 }
 
 export interface TourFilters {
@@ -85,4 +122,18 @@ export interface TourFormInput {
 export interface DepartureFormInput {
   date: string;
   totalSeats: number;
+  price?: number;
+}
+
+export interface PriceTierFormInput {
+  type: "ADULT" | "CHILD";
+  label: string;
+  percentOfBase: number;
+  ageFrom?: number;
+  ageTo?: number;
+}
+
+export interface RoomTypeFormInput {
+  name: string;
+  extraAmount: number;
 }

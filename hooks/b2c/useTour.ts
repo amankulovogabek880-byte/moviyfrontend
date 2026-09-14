@@ -11,3 +11,11 @@ export function useTour(slug: string) {
     staleTime: 10_000,
   });
 }
+
+export function useTourReviews(slug: string) {
+  return useQuery({
+    queryKey: ["b2c", "tour", slug, "reviews"],
+    queryFn: () => publicApi.getTourReviews(slug),
+    enabled: Boolean(slug),
+  });
+}
