@@ -12,15 +12,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const endpoint = body.role === "admin" ? "admin/login" : "partner/login";
+
   let backendRes: Response;
   try {
-    backendRes = await fetch(`${BACKEND_URL}/auth/login`, {
+    backendRes = await fetch(`${BACKEND_URL}/auth/${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: body.email,
         password: body.password,
-        role: body.role,
       }),
     });
   } catch {
@@ -35,8 +36,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const data = await backendRes.json().catch(() => ({}) as { token?: string });
-  const token = data?.token;
+  const data = await backendRes.json().catch(() => ({}) as { accessToken?: string });
+  const token = data?.accessToken;
   if (!token) {
     return NextResponse.json({ message: "Backend javobi noto'g'ri formatda" }, { status: 502 });
   }
