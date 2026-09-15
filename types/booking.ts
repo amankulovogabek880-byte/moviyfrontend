@@ -2,8 +2,10 @@ export type BookingStatus =
   | "PENDING_PAYMENT"
   | "PARTIALLY_PAID"
   | "PAID"
+  | "CONFIRMED_UNPAID"
   | "EXPIRED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "COMPLETED";
 
 export type BookingChannel = "B2C" | "B2B";
 

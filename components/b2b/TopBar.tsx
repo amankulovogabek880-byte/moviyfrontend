@@ -25,7 +25,7 @@ export function TopBar() {
 
   async function handleLogout() {
     await logoutRequest();
-    router.push("/b2b/login");
+    router.push("/login");
     router.refresh();
   }
 

@@ -25,8 +25,12 @@ export function MarkPaidModal({
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [error, setError] = useState<string | null>(null);
-  const markPaid = useMarkPaid(booking.bookingNumber);
-  const markUnpaid = useMarkUnpaid(booking.bookingNumber);
+  // Critical: the backend's mark-paid/mark-unpaid routes key off the
+  // booking's internal `id` (a UUID), not the human-facing `bookingNumber`
+  // — passing bookingNumber here silently 404s (or worse, could hit the
+  // wrong booking if IDs and numbers ever collided in format).
+  const markPaid = useMarkPaid(booking.id);
+  const markUnpaid = useMarkUnpaid(booking.id);
   const isPaid = mode === "paid";
 
   const {

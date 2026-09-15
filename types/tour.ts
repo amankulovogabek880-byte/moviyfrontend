@@ -9,7 +9,7 @@ export interface TourDeparture {
 
 export interface PriceTier {
   id: string;
-  type: "ADULT" | "CHILD";
+  type: "ADULT" | "CHILD" | "INFANT";
   label: string;
   percentOfBase: number;
   ageFrom?: number;
@@ -126,7 +126,7 @@ export interface DepartureFormInput {
 }
 
 export interface PriceTierFormInput {
-  type: "ADULT" | "CHILD";
+  type: "ADULT" | "CHILD" | "INFANT";
   label: string;
   percentOfBase: number;
   ageFrom?: number;

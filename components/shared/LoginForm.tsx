@@ -9,20 +9,18 @@ import { useLogin } from "@/hooks/useAuth";
 import { Input } from "@/components/shared/Input";
 import { Button } from "@/components/shared/Button";
 import { t } from "@/lib/i18n";
-import type { UserRole } from "@/types/auth";
+import { homePathForRole } from "@/lib/auth";
 
-export function LoginForm({
-  role,
-  title,
-  redirectTo,
-}: {
-  role: UserRole;
-  title: string;
-  redirectTo: string;
-}) {
+/**
+ * Single, unified login form for both admin and hamkor (partner) accounts.
+ * There is no role picker — the backend tells us who the person is via
+ * `role` in the login response, and we redirect to the right panel from
+ * there (see hooks/useAuth.ts and app/api/auth/login/route.ts).
+ */
+export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const login = useLogin(role);
+  const login = useLogin();
   const {
     register,
     handleSubmit,
@@ -32,8 +30,8 @@ export function LoginForm({
   async function onSubmit(values: LoginFormValues) {
     setError(null);
     try {
-      await login.mutateAsync(values);
-      router.push(redirectTo);
+      const result = await login.mutateAsync(values);
+      router.push(homePathForRole(result.role));
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : t("auth.invalidCredentials"));
@@ -42,7 +40,7 @@ export function LoginForm({
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col items-center justify-center px-4">
-      <h1 className="mb-6 text-2xl font-bold">{title}</h1>
+      <h1 className="mb-6 text-2xl font-bold">{t("auth.loginTitle")}</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
         {error && <p className="text-sm text-danger">{error}</p>}
         <Input

@@ -6,8 +6,10 @@ const toneMap: Record<BookingStatus, "success" | "warning" | "danger" | "neutral
   PENDING_PAYMENT: "warning",
   PARTIALLY_PAID: "warning",
   PAID: "success",
+  CONFIRMED_UNPAID: "warning",
   EXPIRED: "danger",
   CANCELLED: "neutral",
+  COMPLETED: "success",
 };
 
 export function BookingStatusBadge({ status }: { status: BookingStatus }) {

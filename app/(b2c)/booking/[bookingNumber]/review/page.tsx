@@ -1,12 +1,14 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2 } from "lucide-react";
 import { reviewFormSchema, type ReviewFormValues } from "@/lib/schemas/booking";
 import { useBooking, useSubmitReview } from "@/hooks/b2c/useBooking";
+import { useBookingContact } from "@/hooks/b2c/useBookingContact";
+import { BookingContactGate } from "@/components/b2c/BookingContactGate";
 import { StarRating } from "@/components/shared/StarRating";
 import { Textarea } from "@/components/shared/Textarea";
 import { Button } from "@/components/shared/Button";
@@ -17,15 +19,20 @@ import { ApiError } from "@/lib/api-client";
 
 export default function LeaveReviewPage() {
   const params = useParams<{ bookingNumber: string }>();
+  const searchParams = useSearchParams();
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { contact, setContact, hydrated } = useBookingContact(
+    params.bookingNumber,
+    searchParams.get("contact")
+  );
   const {
     data: booking,
     isLoading,
     isError,
     error: fetchError,
     refetch,
-  } = useBooking(params.bookingNumber);
+  } = useBooking(params.bookingNumber, contact);
   const submitReview = useSubmitReview(params.bookingNumber);
 
   const {
@@ -50,6 +57,18 @@ export default function LeaveReviewPage() {
     }
   }
 
+  if (!hydrated) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-10">
+        <Skeleton className="h-64 w-full rounded-xl2" />
+      </div>
+    );
+  }
+
+  if (!contact) {
+    return <BookingContactGate onSubmit={setContact} />;
+  }
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-xl px-4 py-10">
@@ -59,6 +78,10 @@ export default function LeaveReviewPage() {
   }
 
   if (isError || !booking) {
+    const isNotFound = fetchError instanceof ApiError && fetchError.status === 404;
+    if (isNotFound) {
+      return <BookingContactGate onSubmit={setContact} error={t("b2c.booking.contactGateNotFound")} />;
+    }
     return (
       <div className="mx-auto max-w-xl px-4 py-10">
         <ErrorMessage

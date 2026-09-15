@@ -2,27 +2,21 @@
  * Public (unauthenticated) API client for the B2C surface. Calls the backend
  * directly from the browser using NEXT_PUBLIC_API_URL.
  *
- * ASSUMED BACKEND CONTRACT — the backend is a separate, not-yet-built
- * project, so these paths/shapes are inferred from the product spec. When
- * the real spec lands, this file (plus api-proxy-client.ts) is the only
- * place that needs to change:
+ * Real backend endpoints used here — see the backend's own Swagger docs at
+ * `${NEXT_PUBLIC_API_URL}/api/docs` for the authoritative, up-to-date shape
+ * of every request/response body.
  *
  *   GET  /public/tours?destination=&dateFrom=&dateTo=&priceMin=&priceMax=&page=&pageSize=
- *        -> Paginated<TourListItem>
- *   GET  /public/tours/:slug -> Tour
- *   POST /public/bookings { tourDepartureId, paxCount, contact } -> { bookingNumber }
- *     (or, for tours with price tiers/room types: { tourDepartureId, adultCount,
- *      childCount, childAges, roomTypeId, contact } -> { bookingNumber })
- *   GET  /public/bookings/:bookingNumber -> Booking
- *     (paxCount on the response is always adultCount + childCount, even for
- *      advanced-mode bookings, so existing status-page rendering keeps working)
- *   POST /public/bookings/:bookingNumber/pay { amount } -> { clickCheckoutUrl }
- *   POST /public/bookings/quote { tourDepartureId, adultCount, childCount,
- *        childAges, roomTypeId } -> { totalAmount } — server-computed price
- *        preview for tours with price tiers/room types configured.
- *   GET  /public/tours/:slug/reviews -> Paginated<Review> (approved only)
- *   POST /public/bookings/:bookingNumber/review { rating, comment } -> Review
- *        (server rejects unless the trip has completed and no review exists yet)
+ *   GET  /public/tours/:slug
+ *   POST /public/bookings
+ *   GET  /public/bookings/:bookingNumber?contact= — `contact` (email or
+ *        phone used on the booking) is required; the booking number alone
+ *        is not enough to look up a booking.
+ *   POST /public/bookings/:id/pay/click — note this is the booking's
+ *        internal `id`, not its human-facing `bookingNumber`.
+ *   POST /public/bookings/quote
+ *   GET  /public/tours/:slug/reviews
+ *   POST /public/bookings/:bookingNumber/review
  */
 import type { Tour, TourListItem, TourFilters, Paginated } from "@/types/tour";
 import type {
@@ -103,11 +97,15 @@ export const publicApi = {
       method: "POST",
       body: JSON.stringify(input),
     }),
-  getBooking: (bookingNumber: string) =>
-    request<Booking>(`/public/bookings/${encodeURIComponent(bookingNumber)}`),
-  payBooking: (bookingNumber: string, input: PayBookingInput) =>
+  getBooking: (bookingNumber: string, contact: string) =>
+    request<Booking>(
+      `/public/bookings/${encodeURIComponent(bookingNumber)}?contact=${encodeURIComponent(contact)}`
+    ),
+  // `bookingId` here is the booking's internal `id` (booking.id), not its
+  // human-facing `bookingNumber` — the backend route only accepts the id.
+  payBooking: (bookingId: string, input: PayBookingInput) =>
     request<PayBookingResult>(
-      `/public/bookings/${encodeURIComponent(bookingNumber)}/pay`,
+      `/public/bookings/${encodeURIComponent(bookingId)}/pay/click`,
       { method: "POST", body: JSON.stringify(input) }
     ),
   quotePrice: (input: QuoteBookingInput) =>

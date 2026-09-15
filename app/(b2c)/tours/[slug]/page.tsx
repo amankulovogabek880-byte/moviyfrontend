@@ -16,6 +16,7 @@ import { useCreateBooking } from "@/hooks/b2c/useBooking";
 import { t } from "@/lib/i18n";
 import { formatUsd } from "@/lib/utils";
 import { ApiError } from "@/lib/api-client";
+import { storeBookingContact } from "@/lib/booking-contact";
 import type { BookingContactFormValues, TravelerBookingFormValues } from "@/lib/schemas/booking";
 
 export default function TourDetailPage() {
@@ -64,6 +65,9 @@ export default function TourDetailPage() {
         addOnIds: values.addOnIds,
         contact: { fullName: values.fullName, phone: values.phone, email: values.email },
       });
+      // Stash the contact used so the status page (which the person lands
+      // on next) can call the public lookup endpoint without asking again.
+      storeBookingContact(result.bookingNumber, values.email || values.phone);
       router.push(`/booking/${result.bookingNumber}`);
     } catch (e) {
       setFormError(e instanceof ApiError ? e.message : t("common.networkError"));
@@ -87,6 +91,7 @@ export default function TourDetailPage() {
         addOnIds: values.addOnIds,
         contact: { fullName: values.fullName, phone: values.phone, email: values.email },
       });
+      storeBookingContact(result.bookingNumber, values.email || values.phone);
       router.push(`/booking/${result.bookingNumber}`);
     } catch (e) {
       setFormError(e instanceof ApiError ? e.message : t("common.networkError"));

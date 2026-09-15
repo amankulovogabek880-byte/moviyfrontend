@@ -2,8 +2,10 @@
  * Authenticated API client for the B2B/Admin surfaces. Never touches the JWT
  * directly — calls same-origin /api/proxy/<path>, which forwards to the
  * backend with the token read from the httpOnly session cookie (see
- * app/api/proxy/[...path]/route.ts). On a 401 it redirects to the right
- * login page.
+ * app/api/proxy/[...path]/route.ts). The proxy route itself tries a
+ * refresh-token exchange before giving up (see §9 in the fix prompt); if it
+ * still comes back 401 here, the session is genuinely dead and we send the
+ * person to the single unified /login page.
  */
 import { ApiError } from "@/lib/api-client";
 
@@ -34,8 +36,7 @@ async function proxyRequest<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (res.status === 401) {
     if (typeof window !== "undefined") {
-      const isAdmin = window.location.pathname.startsWith("/admin");
-      window.location.href = isAdmin ? "/admin/login" : "/b2b/login";
+      window.location.href = "/login";
     }
     throw new ApiError("Sessiya muddati tugadi. Qayta kiring.", 401, "UNAUTHORIZED");
   }

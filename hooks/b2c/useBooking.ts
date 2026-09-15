@@ -4,11 +4,14 @@ import type { CreateBookingInput, PayBookingInput, QuoteBookingInput } from "@/t
 import type { ReviewFormInput } from "@/types/review";
 import type { WaitlistFormInput } from "@/types/waitlist";
 
-export function useBooking(bookingNumber: string) {
+// `contact` is the email or phone used on the booking — the backend's
+// public lookup endpoint requires it alongside the booking number (see
+// lib/api-client.ts and lib/booking-contact.ts for where it comes from).
+export function useBooking(bookingNumber: string, contact: string | null | undefined) {
   return useQuery({
-    queryKey: ["b2c", "booking", bookingNumber],
-    queryFn: () => publicApi.getBooking(bookingNumber),
-    enabled: Boolean(bookingNumber),
+    queryKey: ["b2c", "booking", bookingNumber, contact],
+    queryFn: () => publicApi.getBooking(bookingNumber, contact as string),
+    enabled: Boolean(bookingNumber) && Boolean(contact),
     staleTime: 5_000,
   });
 }
@@ -28,10 +31,12 @@ export function useBookingQuote(input: QuoteBookingInput, enabled: boolean) {
   });
 }
 
-export function usePayBooking(bookingNumber: string) {
+// `bookingId` is the booking's internal `id` (booking.id), not its
+// human-facing `bookingNumber` — see lib/api-client.ts's payBooking.
+export function usePayBooking(bookingId: string, bookingNumber: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: PayBookingInput) => publicApi.payBooking(bookingNumber, input),
+    mutationFn: (input: PayBookingInput) => publicApi.payBooking(bookingId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["b2c", "booking", bookingNumber] });
     },

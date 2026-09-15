@@ -52,8 +52,7 @@ const uz: Dict = {
     reallyDeleteConfirm: "Rostdan ham davom etasizmi?",
   },
   auth: {
-    loginTitleB2b: "Hamkor kabinetiga kirish",
-    loginTitleAdmin: "Boshqaruv paneliga kirish",
+    loginTitle: "Tizimga kirish",
     emailLabel: "Email",
     passwordLabel: "Parol",
     submit: "Kirish",
@@ -66,7 +65,7 @@ const uz: Dict = {
       home: "Bosh sahifa",
       tours: "Turlar",
       myBooking: "Mening bronim",
-      partnerLogin: "Hamkorlar uchun",
+      partnerLogin: "Kirish",
     },
     home: {
       heroTitle: "Orzuingizdagi sayohatni bugun boshlang",
@@ -138,6 +137,12 @@ const uz: Dict = {
       statusExpired: "Muddati tugagan",
       statusCancelled: "Bekor qilingan",
       redirectingToClick: "Click to'lov sahifasiga yo'naltirilmoqda...",
+      contactGateTitle: "Bronni ko'rish uchun tasdiqlang",
+      contactGateHint: "Bron qilishda ko'rsatgan email yoki telefon raqamingizni kiriting",
+      contactGatePlaceholder: "Email yoki telefon raqami",
+      contactGateSubmit: "Ko'rsatish",
+      contactGateRequired: "Email yoki telefon raqami talab qilinadi",
+      contactGateNotFound: "Bron topilmadi. Kontakt ma'lumotini tekshirib qayta urinib ko'ring",
     },
     success: {
       title: "To'lov muvaffaqiyatli amalga oshirildi!",
@@ -478,8 +483,10 @@ const uz: Dict = {
     PENDING_PAYMENT: "To'lov kutilmoqda",
     PARTIALLY_PAID: "Qisman to'langan",
     PAID: "To'langan",
+    CONFIRMED_UNPAID: "Postpaid hamkor — kredit hisobidan",
     EXPIRED: "Muddati tugagan",
     CANCELLED: "Bekor qilingan",
+    COMPLETED: "Yakunlangan",
   },
 };
 

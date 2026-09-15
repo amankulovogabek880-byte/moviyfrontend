@@ -1,6 +1,7 @@
-import { LoginForm } from "@/components/shared/LoginForm";
-import { t } from "@/lib/i18n";
+import { redirect } from "next/navigation";
 
-export default function B2BLoginPage() {
-  return <LoginForm role="b2b" title={t("auth.loginTitleB2b")} redirectTo="/b2b" />;
+// Kept only so old bookmarks/links to /b2b/login don't 404 — the real
+// login form now lives at /login (see app/login/page.tsx).
+export default function B2BLoginRedirectPage() {
+  redirect("/login");
 }

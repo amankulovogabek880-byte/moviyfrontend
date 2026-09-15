@@ -48,7 +48,7 @@ export function Sidebar() {
 
   async function handleLogout() {
     await logoutRequest();
-    router.push("/admin/login");
+    router.push("/login");
     router.refresh();
   }
 

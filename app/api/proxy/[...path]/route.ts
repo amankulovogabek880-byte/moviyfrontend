@@ -1,49 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { SESSION_COOKIE, ROLE_COOKIE } from "@/lib/auth";
+import { SESSION_COOKIE, REFRESH_COOKIE, ROLE_COOKIE } from "@/lib/auth";
 
 const BACKEND_URL = process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "";
 
-async function handle(req: NextRequest, params: { path: string[] }) {
-  const token = cookies().get(SESSION_COOKIE)?.value;
-  if (!token) {
-    return NextResponse.json({ message: "Avtorizatsiyadan o'tilmagan" }, { status: 401 });
-  }
+function clearAuthCookies(res: NextResponse) {
+  res.cookies.delete(SESSION_COOKIE);
+  res.cookies.delete(REFRESH_COOKIE);
+  res.cookies.delete(ROLE_COOKIE);
+}
 
-  const targetPath = params.path.join("/");
-  const search = req.nextUrl.search;
-  const url = `${BACKEND_URL}/${targetPath}${search}`;
-
-  const init: RequestInit = {
-    method: req.method,
+function backendInit(method: string, accessToken: string, bodyText: string | null): RequestInit {
+  return {
+    method,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
+    ...(bodyText ? { body: bodyText } : {}),
   };
+}
 
-  if (req.method !== "GET" && req.method !== "HEAD") {
-    const bodyText = await req.text();
-    if (bodyText) init.body = bodyText;
-  }
-
-  let backendRes: Response;
+/**
+ * Tries to exchange the refresh-token cookie for a new access token. Returns
+ * the new tokens on success, or null if there's no refresh token or the
+ * backend rejects it (refresh token expired/revoked too — the person needs
+ * to log in again).
+ */
+async function tryRefresh(refreshToken: string) {
   try {
-    backendRes = await fetch(url, init);
+    const res = await fetch(`${BACKEND_URL}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) return null;
+    const data = await res
+      .json()
+      .catch(() => null as { accessToken?: string; refreshToken?: string } | null);
+    if (!data?.accessToken) return null;
+    return { accessToken: data.accessToken, refreshToken: data.refreshToken ?? refreshToken };
   } catch {
-    return NextResponse.json({ message: "Backend bilan bog'lanib bo'lmadi" }, { status: 502 });
+    return null;
   }
+}
 
-  if (backendRes.status === 401) {
-    const res = NextResponse.json({ message: "Sessiya muddati tugadi" }, { status: 401 });
-    res.cookies.delete(SESSION_COOKIE);
-    res.cookies.delete(ROLE_COOKIE);
-    return res;
-  }
-
-  // Binary-safe passthrough (JSON survives this unchanged; PDF/Excel document
-  // downloads — see §6 — need the raw bytes rather than a text() decode/encode
-  // roundtrip, which corrupts non-UTF8 binary content).
+async function passthroughResponse(backendRes: Response) {
   const buffer = await backendRes.arrayBuffer();
   const contentDisposition = backendRes.headers.get("Content-Disposition");
   return new NextResponse(buffer.byteLength ? buffer : null, {
@@ -53,6 +55,73 @@ async function handle(req: NextRequest, params: { path: string[] }) {
       ...(contentDisposition ? { "Content-Disposition": contentDisposition } : {}),
     },
   });
+}
+
+async function handle(req: NextRequest, params: { path: string[] }) {
+  const cookieStore = cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  if (!token) {
+    return NextResponse.json({ message: "Avtorizatsiyadan o'tilmagan" }, { status: 401 });
+  }
+
+  const targetPath = params.path.join("/");
+  const search = req.nextUrl.search;
+  const url = `${BACKEND_URL}/${targetPath}${search}`;
+
+  // Read the body once so it can be replayed on a refresh-and-retry below —
+  // req.text() can only be consumed a single time.
+  const bodyText =
+    req.method !== "GET" && req.method !== "HEAD" ? (await req.text()) || null : null;
+
+  let backendRes: Response;
+  try {
+    backendRes = await fetch(url, backendInit(req.method, token, bodyText));
+  } catch {
+    return NextResponse.json({ message: "Backend bilan bog'lanib bo'lmadi" }, { status: 502 });
+  }
+
+  if (backendRes.status === 401) {
+    const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
+    const refreshed = refreshToken ? await tryRefresh(refreshToken) : null;
+
+    if (refreshed) {
+      let retryRes: Response;
+      try {
+        retryRes = await fetch(url, backendInit(req.method, refreshed.accessToken, bodyText));
+      } catch {
+        retryRes = backendRes;
+      }
+
+      const out = await passthroughResponse(retryRes);
+      const isProd = process.env.NODE_ENV === "production";
+      out.cookies.set(SESSION_COOKIE, refreshed.accessToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 12,
+      });
+      out.cookies.set(REFRESH_COOKIE, refreshed.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      return out;
+    }
+
+    // No refresh token, or refresh itself failed — old behavior: clear
+    // cookies and bubble the 401 up so the client redirects to /login.
+    const res = NextResponse.json({ message: "Sessiya muddati tugadi" }, { status: 401 });
+    clearAuthCookies(res);
+    return res;
+  }
+
+  // Binary-safe passthrough (JSON survives this unchanged; PDF/Excel document
+  // downloads — see §6 — need the raw bytes rather than a text() decode/encode
+  // roundtrip, which corrupts non-UTF8 binary content).
+  return passthroughResponse(backendRes);
 }
 
 export async function GET(req: NextRequest, ctx: { params: { path: string[] } }) {

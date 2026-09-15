@@ -36,6 +36,10 @@ export function useCancelPreview(id: string, enabled: boolean) {
         `admin/bookings/${encodeURIComponent(id)}/cancel-preview`
       ),
     enabled,
+    // Don't hammer the backend with retries if this endpoint isn't live yet
+    // on their side — CancelBookingModal already renders fine with no
+    // preview.data (it just hides the suggested-amount hint).
+    retry: false,
   });
 }
 
@@ -60,6 +64,9 @@ export function useBookingNotifications(bookingId: string) {
         `admin/bookings/${encodeURIComponent(bookingId)}/notifications`
       ),
     enabled: Boolean(bookingId),
+    // Same as useCancelPreview — degrade to an empty list rather than
+    // retrying/crashing if this endpoint isn't live yet.
+    retry: false,
   });
 }
 
@@ -71,24 +78,23 @@ export function useAdminRefunds(filters?: RefundFilters) {
   });
 }
 
-export function useMarkPaid(bookingNumber: string) {
+// `bookingId` is the booking's internal `id`, not its `bookingNumber` — see
+// the comment in MarkPaidModal.tsx.
+export function useMarkPaid(bookingId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: MarkPaidInput) =>
-      proxyApi.patch<Booking>(
-        `admin/bookings/${encodeURIComponent(bookingNumber)}/mark-paid`,
-        input
-      ),
+      proxyApi.patch<Booking>(`admin/bookings/${encodeURIComponent(bookingId)}/mark-paid`, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "bookings"] }),
   });
 }
 
-export function useMarkUnpaid(bookingNumber: string) {
+export function useMarkUnpaid(bookingId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: MarkUnpaidInput) =>
       proxyApi.patch<Booking>(
-        `admin/bookings/${encodeURIComponent(bookingNumber)}/mark-unpaid`,
+        `admin/bookings/${encodeURIComponent(bookingId)}/mark-unpaid`,
         input
       ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "bookings"] }),

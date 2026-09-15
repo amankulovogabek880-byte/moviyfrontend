@@ -14,7 +14,7 @@ export function PaySection({ booking }: { booking: Booking }) {
   const [mode, setMode] = useState<"idle" | "partial">("idle");
   const [amount, setAmount] = useState(remaining);
   const [error, setError] = useState<string | null>(null);
-  const payBooking = usePayBooking(booking.bookingNumber);
+  const payBooking = usePayBooking(booking.id, booking.bookingNumber);
 
   async function handlePay(payAmount: number) {
     setError(null);

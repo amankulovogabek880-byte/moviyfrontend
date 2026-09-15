@@ -1,28 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { CountdownTimer } from "@/components/b2c/CountdownTimer";
 import { PaySection } from "@/components/b2c/PaySection";
+import { BookingContactGate } from "@/components/b2c/BookingContactGate";
 import { BookingStatusBadge } from "@/components/shared/BookingStatusBadge";
 import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
 import { useBooking } from "@/hooks/b2c/useBooking";
+import { useBookingContact } from "@/hooks/b2c/useBookingContact";
 import { t } from "@/lib/i18n";
 import { formatDate, formatUsd, isTripCompleted, remainingBalance } from "@/lib/utils";
 import { ApiError } from "@/lib/api-client";
 
 export default function BookingStatusPage() {
   const params = useParams<{ bookingNumber: string }>();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const { contact, setContact, hydrated } = useBookingContact(
+    params.bookingNumber,
+    searchParams.get("contact")
+  );
   const {
     data: booking,
     isLoading,
     isError,
     error,
     refetch,
-  } = useBooking(params.bookingNumber);
+  } = useBooking(params.bookingNumber, contact);
+
+  if (!hydrated) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-10">
+        <Skeleton className="h-64 w-full rounded-xl2" />
+      </div>
+    );
+  }
+
+  if (!contact) {
+    return <BookingContactGate onSubmit={setContact} />;
+  }
 
   if (isLoading) {
     return (
@@ -33,6 +52,17 @@ export default function BookingStatusPage() {
   }
 
   if (isError || !booking) {
+    const isNotFound = error instanceof ApiError && error.status === 404;
+    if (isNotFound) {
+      // Wrong/stale contact — let the person try a different one instead of
+      // stuck on a generic network-error retry button.
+      return (
+        <BookingContactGate
+          onSubmit={setContact}
+          error={t("b2c.booking.contactGateNotFound")}
+        />
+      );
+    }
     return (
       <div className="mx-auto max-w-2xl px-4 py-10">
         <ErrorMessage
