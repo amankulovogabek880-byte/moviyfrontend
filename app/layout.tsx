@@ -11,7 +11,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MoviyTravel",
+  title: "Omon Travel",
   description: "Sayohat turlarini onlayn bron qilish",
 };
 

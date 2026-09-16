@@ -60,7 +60,7 @@ const uz: Dict = {
     loggingIn: "Kirilmoqda...",
   },
   b2c: {
-    brand: "MoviyTravel",
+    brand: "Omon Travel",
     nav: {
       home: "Bosh sahifa",
       tours: "Turlar",
@@ -164,7 +164,7 @@ const uz: Dict = {
     },
   },
   b2b: {
-    brand: "MoviyTravel Hamkor",
+    brand: "Omon Travel Hamkor",
     nav: {
       dashboard: "Boshqaruv paneli",
       tours: "Turlar",
@@ -224,7 +224,7 @@ const uz: Dict = {
     },
   },
   admin: {
-    brand: "MoviyTravel Admin",
+    brand: "Omon Travel Admin",
     nav: {
       dashboard: "Boshqaruv paneli",
       tours: "Turlar",
