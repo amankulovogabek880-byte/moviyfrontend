@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import {
   departureFormSchema,
   departurePriceUpdateSchema,
@@ -69,7 +69,9 @@ function DepartureRow({ tourId, departure }: { tourId: string; departure: TourDe
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border px-3 py-2 text-sm">
       <div className="flex items-center justify-between">
-        <span>{formatDate(departure.date)}</span>
+        <span>
+          {formatDate(departure.departureDate)} → {formatDate(departure.returnDate)}
+        </span>
         <span className="text-muted">
           {departure.remainingSeats}/{departure.totalSeats} {t("common.seatsLeft")}
         </span>
@@ -146,12 +148,18 @@ export function DepartureEditor({
           <p className="text-sm text-muted">{t("b2c.tourDetail.noDepartures")}</p>
         )}
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex items-end gap-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-wrap items-end gap-3">
         <Input
           label={t("admin.tourForm.departureDate")}
           type="date"
-          error={errors.date?.message}
-          {...register("date")}
+          error={errors.departureDate?.message}
+          {...register("departureDate")}
+        />
+        <Input
+          label={t("admin.tourForm.departureReturnDate")}
+          type="date"
+          error={errors.returnDate?.message}
+          {...register("returnDate")}
         />
         <Input
           label={t("admin.tourForm.departureSeats")}
@@ -160,14 +168,114 @@ export function DepartureEditor({
           {...register("totalSeats", { valueAsNumber: true })}
         />
         <Input
-          label={t("admin.tourForm.departurePriceLabel")}
+          label={t("admin.tourForm.departureBasePriceOverride")}
           type="number"
-          error={errors.price?.message}
-          {...register("price", { valueAsNumber: true })}
+          error={errors.basePriceOverride?.message}
+          {...register("basePriceOverride", { valueAsNumber: true })}
+        />
+        <Input
+          label={t("admin.tourForm.departureCommissionOverride")}
+          type="number"
+          error={errors.commissionOverride?.message}
+          {...register("commissionOverride", { valueAsNumber: true })}
         />
         <Button type="submit" isLoading={addDeparture.isPending}>
           {t("admin.tourForm.addDeparture")}
         </Button>
+      </form>
+    </section>
+  );
+}
+
+/**
+ * Local (not-yet-persisted) departure list used on the "new tour" flow,
+ * before the tour itself has an id. Reuses the same form fields as
+ * DepartureEditor's add-form, but only updates an in-memory array via
+ * `onChange` instead of calling `useAddDeparture`. Allows zero entries —
+ * the admin can always add departure dates later from the edit page.
+ */
+export function DepartureDraftList({
+  value,
+  onChange,
+}: {
+  value: DepartureFormValues[];
+  onChange: (departures: DepartureFormValues[]) => void;
+}) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<DepartureFormValues>({ resolver: zodResolver(departureFormSchema) });
+
+  function onAdd(values: DepartureFormValues) {
+    onChange([...value, values]);
+    reset();
+  }
+
+  function onRemove(index: number) {
+    onChange(value.filter((_, i) => i !== index));
+  }
+
+  return (
+    <section className="rounded-xl2 border border-border p-5">
+      <h2 className="mb-4 font-semibold">{t("admin.tourForm.departures")}</h2>
+      <div className="mb-4 flex flex-col gap-2">
+        {value.map((dep, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm"
+          >
+            <span>
+              {formatDate(dep.departureDate)} → {formatDate(dep.returnDate)} · {dep.totalSeats}{" "}
+              {t("common.seatsLeft")}
+            </span>
+            <button
+              type="button"
+              onClick={() => onRemove(index)}
+              className="rounded p-1.5 text-danger hover:bg-danger/10"
+              aria-label={t("common.delete")}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+        {value.length === 0 && (
+          <p className="text-sm text-muted">{t("b2c.tourDetail.noDepartures")}</p>
+        )}
+      </div>
+      <form onSubmit={handleSubmit(onAdd)} className="flex flex-wrap items-end gap-3">
+        <Input
+          label={t("admin.tourForm.departureDate")}
+          type="date"
+          error={errors.departureDate?.message}
+          {...register("departureDate")}
+        />
+        <Input
+          label={t("admin.tourForm.departureReturnDate")}
+          type="date"
+          error={errors.returnDate?.message}
+          {...register("returnDate")}
+        />
+        <Input
+          label={t("admin.tourForm.departureSeats")}
+          type="number"
+          error={errors.totalSeats?.message}
+          {...register("totalSeats", { valueAsNumber: true })}
+        />
+        <Input
+          label={t("admin.tourForm.departureBasePriceOverride")}
+          type="number"
+          error={errors.basePriceOverride?.message}
+          {...register("basePriceOverride", { valueAsNumber: true })}
+        />
+        <Input
+          label={t("admin.tourForm.departureCommissionOverride")}
+          type="number"
+          error={errors.commissionOverride?.message}
+          {...register("commissionOverride", { valueAsNumber: true })}
+        />
+        <Button type="submit">{t("admin.tourForm.addDeparture")}</Button>
       </form>
     </section>
   );

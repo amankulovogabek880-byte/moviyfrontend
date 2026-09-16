@@ -1,6 +1,7 @@
 export interface TourDeparture {
   id: string;
-  date: string;
+  departureDate: string;
+  returnDate: string;
   totalSeats: number;
   remainingSeats: number;
   price?: number | null;
@@ -52,13 +53,17 @@ export interface Tour {
   id: string;
   slug: string;
   title: string;
+  categoryId?: string;
   destination: string;
-  shortDescription: string;
+  country: string;
+  city: string;
   description: string;
   images: TourImage[];
   itinerary: ItineraryDay[];
   basePrice: number;
-  commissionPercent?: number;
+  commissionAmount: number;
+  currency?: string;
+  active?: boolean;
   durationDays: number;
   departures: TourDeparture[];
   isFeatured?: boolean;
@@ -110,19 +115,25 @@ export interface Paginated<T> {
 export interface TourFormInput {
   title: string;
   slug: string;
+  categoryId?: string;
   destination: string;
-  shortDescription: string;
+  country: string;
+  city: string;
   description: string;
   durationDays: number;
   basePrice: number;
-  commissionPercent: number;
+  commissionAmount: number;
+  currency?: string;
+  active?: boolean;
   itinerary: ItineraryDay[];
 }
 
 export interface DepartureFormInput {
-  date: string;
+  departureDate: string;
+  returnDate: string;
   totalSeats: number;
-  price?: number;
+  basePriceOverride?: number;
+  commissionOverride?: number;
 }
 
 export interface PriceTierFormInput {

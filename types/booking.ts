@@ -90,7 +90,7 @@ export interface QuoteBookingResult {
   totalAmount: number;
 }
 
-export type RefundStatus = "PENDING" | "COMPLETED" | "REJECTED";
+export type RefundStatus = "PENDING" | "DONE";
 
 export interface RefundRequest {
   id: string;

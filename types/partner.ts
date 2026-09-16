@@ -10,6 +10,7 @@ export interface PartnerTourDiscount {
 export interface Partner {
   id: string;
   companyName: string;
+  contactPerson: string;
   email: string;
   phone?: string;
   discountPercent: number;
@@ -59,10 +60,10 @@ export interface PartnerUserFormInput {
 
 export interface PartnerFormInput {
   companyName: string;
+  contactPerson: string;
   email: string;
   phone?: string;
   discountPercent: number;
-  password?: string;
 }
 
 export interface PartnerFilters {

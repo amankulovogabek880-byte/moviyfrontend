@@ -1,9 +1,9 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { TourForm } from "@/components/admin/TourForm";
-import { DepartureEditor } from "@/components/admin/DepartureEditor";
+import { DepartureEditor, DepartureDraftList } from "@/components/admin/DepartureEditor";
 import { PriceTiersEditor, RoomTypesEditor } from "@/components/admin/PricingOptionsEditor";
 import { AddOnsEditor } from "@/components/admin/AddOnsEditor";
 import { TourVisibilityEditor } from "@/components/admin/TourVisibilityEditor";
@@ -12,14 +12,17 @@ import { Skeleton } from "@/components/shared/Skeleton";
 import { useAdminTour, useCreateTour, useUpdateTour } from "@/hooks/admin/useTours";
 import { t } from "@/lib/i18n";
 import { ApiError } from "@/lib/api-client";
-import type { TourFormValues } from "@/lib/schemas/tour";
+import { proxyApi } from "@/lib/api-proxy-client";
+import type { TourFormValues, DepartureFormValues } from "@/lib/schemas/tour";
 
 export default function AdminTourEditPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isNew = params.id === "new";
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [draftDepartures, setDraftDepartures] = useState<DepartureFormValues[]>([]);
 
   const {
     data: tour,
@@ -31,13 +34,39 @@ export default function AdminTourEditPage() {
   const createTour = useCreateTour();
   const updateTour = useUpdateTour(params.id);
 
+  useEffect(() => {
+    const departureErrors = searchParams.get("departureErrors");
+    if (departureErrors) {
+      setError(`${t("admin.tourForm.savedWithDepartureErrors")}: ${departureErrors}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleSubmit(values: TourFormValues) {
     setError(null);
     setSaved(false);
     try {
       if (isNew) {
         const created = await createTour.mutateAsync(values);
-        router.push(`/admin/tours/${created.id}`);
+        const failedDepartures: string[] = [];
+        for (const departure of draftDepartures) {
+          try {
+            await proxyApi.post(`admin/tours/${created.id}/departures`, departure);
+          } catch (departureError) {
+            failedDepartures.push(
+              `${departure.departureDate} (${
+                departureError instanceof ApiError
+                  ? departureError.message
+                  : t("common.networkError")
+              })`
+            );
+          }
+        }
+        const query =
+          failedDepartures.length > 0
+            ? `?departureErrors=${encodeURIComponent(failedDepartures.join("; "))}`
+            : "";
+        router.push(`/admin/tours/${created.id}${query}`);
       } else {
         await updateTour.mutateAsync(values);
         setSaved(true);
@@ -69,7 +98,11 @@ export default function AdminTourEditPage() {
         isSubmitting={createTour.isPending || updateTour.isPending}
         onSubmit={handleSubmit}
       />
-      {!isNew && tour && <DepartureEditor tourId={tour.id} departures={tour.departures} />}
+      {isNew ? (
+        <DepartureDraftList value={draftDepartures} onChange={setDraftDepartures} />
+      ) : (
+        tour && <DepartureEditor tourId={tour.id} departures={tour.departures} />
+      )}
       {!isNew && tour && (
         <PriceTiersEditor tourId={tour.id} priceTiers={tour.priceTiers ?? []} />
       )}

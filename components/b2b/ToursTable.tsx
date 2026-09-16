@@ -50,7 +50,7 @@ export function ToursTable({ tours }: { tours: B2BTourListItem[] }) {
                 <tr className="border-t border-border hover:bg-surface/50">
                   <td className="px-3 py-2 font-medium">{row.tour.title}</td>
                   <td className="px-3 py-2 text-muted">{row.tour.destination}</td>
-                  <td className="px-3 py-2">{formatDate(row.departure.date)}</td>
+                  <td className="px-3 py-2">{formatDate(row.departure.departureDate)}</td>
                   <td className="px-3 py-2">
                     {soldOut ? (
                       <Badge tone="neutral">0</Badge>

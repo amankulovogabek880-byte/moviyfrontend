@@ -13,16 +13,14 @@ import { formatDate, formatUsd } from "@/lib/utils";
 import { ApiError } from "@/lib/api-client";
 import type { RefundStatus } from "@/types/booking";
 
-const statuses: RefundStatus[] = ["PENDING", "COMPLETED", "REJECTED"];
+const statuses: RefundStatus[] = ["PENDING", "DONE"];
 const toneMap: Record<RefundStatus, "warning" | "success" | "danger"> = {
   PENDING: "warning",
-  COMPLETED: "success",
-  REJECTED: "danger",
+  DONE: "success",
 };
 const labelKeyMap: Record<RefundStatus, string> = {
   PENDING: "admin.refunds.statusPending",
-  COMPLETED: "admin.refunds.statusCompleted",
-  REJECTED: "admin.refunds.statusRejected",
+  DONE: "admin.refunds.statusCompleted",
 };
 
 export default function AdminRefundsPage() {
@@ -56,7 +54,7 @@ export default function AdminRefundsPage() {
           message={error instanceof ApiError ? error.message : t("common.networkError")}
           onRetry={() => refetch()}
         />
-      ) : (data?.items.length ?? 0) === 0 ? (
+      ) : (data?.items?.length ?? 0) === 0 ? (
         <EmptyState message={t("common.noResults")} />
       ) : (
         <div className="overflow-x-auto rounded-xl2 border border-border">
@@ -72,7 +70,7 @@ export default function AdminRefundsPage() {
               </tr>
             </thead>
             <tbody>
-              {data?.items.map((refund) => (
+              {data?.items?.map((refund) => (
                 <tr key={refund.id} className="border-t border-border hover:bg-surface/50">
                   <td className="px-3 py-2 font-mono">
                     <Link href={`/admin/bookings/${refund.bookingId}`} className="text-accent hover:underline">

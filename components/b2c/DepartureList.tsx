@@ -41,7 +41,7 @@ export function DepartureList({
             )}
           >
             <span className="font-medium">
-              {formatDate(dep.date)}
+              {formatDate(dep.departureDate)}
               {showPerDatePrice && (
                 <span className="ml-2 text-sm font-normal text-accent">
                   — {formatUsd(effectivePrices[index])}

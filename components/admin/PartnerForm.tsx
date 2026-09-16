@@ -24,7 +24,13 @@ export function PartnerForm({
     formState: { errors },
   } = useForm<PartnerFormValues>({
     resolver: zodResolver(partnerFormSchema),
-    defaultValues: { companyName: "", email: "", discountPercent: 0, ...defaultValues },
+    defaultValues: {
+      companyName: "",
+      contactPerson: "",
+      email: "",
+      discountPercent: 0,
+      ...defaultValues,
+    },
   });
 
   return (
@@ -36,6 +42,11 @@ export function PartnerForm({
         label={t("admin.partnerForm.companyNameLabel")}
         error={errors.companyName?.message}
         {...register("companyName")}
+      />
+      <Input
+        label={t("admin.partnerForm.contactPersonLabel")}
+        error={errors.contactPerson?.message}
+        {...register("contactPerson")}
       />
       <Input
         label={t("admin.partnerForm.emailLabel")}
@@ -55,12 +66,7 @@ export function PartnerForm({
         {...register("discountPercent", { valueAsNumber: true })}
       />
       {isNew && (
-        <Input
-          label={t("admin.partnerForm.passwordLabel")}
-          type="password"
-          error={errors.password?.message}
-          {...register("password")}
-        />
+        <p className="text-sm text-muted">{t("admin.partnerForm.passwordAutoNote")}</p>
       )}
       <Button type="submit" isLoading={isSubmitting} className="self-start">
         {t("admin.partnerForm.saveButton")}

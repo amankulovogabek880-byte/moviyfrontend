@@ -14,20 +14,20 @@ import { formatDate } from "@/lib/utils";
 import { ApiError } from "@/lib/api-client";
 import type { ReviewStatus } from "@/types/review";
 
-const statuses: ReviewStatus[] = ["PENDING", "APPROVED", "REJECTED"];
+const statuses: ReviewStatus[] = ["PENDING_MODERATION", "APPROVED", "REJECTED"];
 const toneMap: Record<ReviewStatus, "warning" | "success" | "danger"> = {
-  PENDING: "warning",
+  PENDING_MODERATION: "warning",
   APPROVED: "success",
   REJECTED: "danger",
 };
 const labelKeyMap: Record<ReviewStatus, string> = {
-  PENDING: "admin.reviews.statusPending",
+  PENDING_MODERATION: "admin.reviews.statusPending",
   APPROVED: "admin.reviews.statusApproved",
   REJECTED: "admin.reviews.statusRejected",
 };
 
 export default function AdminReviewsPage() {
-  const [status, setStatus] = useState<ReviewStatus | "">("PENDING");
+  const [status, setStatus] = useState<ReviewStatus | "">("PENDING_MODERATION");
   const { data, isLoading, isError, error, refetch } = useAdminReviews({
     status: status || undefined,
   });
@@ -77,7 +77,7 @@ export default function AdminReviewsPage() {
               <p className="mt-2 text-sm text-muted">{review.comment}</p>
               <div className="mt-3 flex items-center justify-between">
                 <p className="text-xs text-muted">{formatDate(review.createdAt)}</p>
-                {review.status === "PENDING" && (
+                {review.status === "PENDING_MODERATION" && (
                   <div className="flex gap-2">
                     <Button
                       size="sm"

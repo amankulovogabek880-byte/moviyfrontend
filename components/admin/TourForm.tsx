@@ -29,11 +29,12 @@ export function TourForm({
       title: "",
       slug: "",
       destination: "",
-      shortDescription: "",
+      country: "",
+      city: "",
       description: "",
       durationDays: 1,
       basePrice: 0,
-      commissionPercent: 0,
+      commissionAmount: 0,
       itinerary: [],
       ...defaultValues,
     },
@@ -62,6 +63,16 @@ export function TourForm({
             {...register("destination")}
           />
           <Input
+            label={t("admin.tourForm.countryLabel")}
+            error={errors.country?.message}
+            {...register("country")}
+          />
+          <Input
+            label={t("admin.tourForm.cityLabel")}
+            error={errors.city?.message}
+            {...register("city")}
+          />
+          <Input
             label={t("admin.tourForm.durationLabel")}
             type="number"
             error={errors.durationDays?.message}
@@ -69,11 +80,6 @@ export function TourForm({
           />
         </div>
         <div className="mt-4 grid grid-cols-1 gap-4">
-          <Textarea
-            label={t("admin.tourForm.shortDescriptionLabel")}
-            error={errors.shortDescription?.message}
-            {...register("shortDescription")}
-          />
           <Textarea
             label={t("admin.tourForm.descriptionLabel")}
             className="min-h-40"
@@ -95,8 +101,8 @@ export function TourForm({
           <Input
             label={t("admin.tourForm.commissionLabel")}
             type="number"
-            error={errors.commissionPercent?.message}
-            {...register("commissionPercent", { valueAsNumber: true })}
+            error={errors.commissionAmount?.message}
+            {...register("commissionAmount", { valueAsNumber: true })}
           />
         </div>
       </section>
