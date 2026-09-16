@@ -34,6 +34,30 @@ async function proxyRequest<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError("Server bilan bog'lanishda xatolik yuz berdi.", 0, "NETWORK_ERROR");
   }
 
+  return handleProxyResponse<T>(res);
+}
+
+/**
+ * File-upload variant of proxyRequest — used for `multipart/form-data`
+ * requests (see components/admin/TourImagesEditor.tsx). Deliberately does
+ * NOT set a Content-Type header: the browser sets
+ * `multipart/form-data; boundary=...` itself from the FormData body, and
+ * setting it manually here would drop the boundary and corrupt the upload.
+ * See app/api/proxy/[...path]/route.ts for the matching binary-safe
+ * passthrough on the server side.
+ */
+async function proxyRequestFormData<T>(path: string, formData: FormData): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`/api/proxy/${path}`, { method: "POST", body: formData });
+  } catch {
+    throw new ApiError("Server bilan bog'lanishda xatolik yuz berdi.", 0, "NETWORK_ERROR");
+  }
+
+  return handleProxyResponse<T>(res);
+}
+
+async function handleProxyResponse<T>(res: Response): Promise<T> {
   if (res.status === 401) {
     if (typeof window !== "undefined") {
       window.location.href = "/login";
@@ -66,4 +90,5 @@ export const proxyApi = {
   patch: <T,>(path: string, body?: unknown) =>
     proxyRequest<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
   delete: <T,>(path: string) => proxyRequest<T>(path, { method: "DELETE" }),
+  postFormData: <T,>(path: string, formData: FormData) => proxyRequestFormData<T>(path, formData),
 };

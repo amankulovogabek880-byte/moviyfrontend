@@ -18,10 +18,11 @@ export function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: me } = useB2BMe();
-  const items =
-    me?.partnerUserRole === "OWNER"
-      ? [...navItems, { href: "/b2b/team", label: "b2b.nav.team" }]
-      : navItems;
+  const items = [
+    ...navItems,
+    ...(me?.partnerUserRole === "OWNER" ? [{ href: "/b2b/team", label: "b2b.nav.team" }] : []),
+    { href: "/b2b/profile", label: "b2b.nav.profile" },
+  ];
 
   async function handleLogout() {
     await logoutRequest();

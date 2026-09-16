@@ -12,6 +12,8 @@
  *   GET  /public/bookings/:bookingNumber?contact= — `contact` (email or
  *        phone used on the booking) is required; the booking number alone
  *        is not enough to look up a booking.
+ *   GET  /public/bookings/my-bookings?phone= — lists every booking made
+ *        with that phone number, no password required.
  *   POST /public/bookings/:id/pay/click — note this is the booking's
  *        internal `id`, not its human-facing `bookingNumber`.
  *   POST /public/bookings/quote
@@ -101,6 +103,10 @@ export const publicApi = {
     request<Booking>(
       `/public/bookings/${encodeURIComponent(bookingNumber)}?contact=${encodeURIComponent(contact)}`
     ),
+  // Lists every booking made with a given phone number — no password, the
+  // phone itself is the lookup key (see app/(b2c)/my-bookings/page.tsx).
+  getMyBookings: (phone: string) =>
+    request<Booking[]>(`/public/bookings/my-bookings?phone=${encodeURIComponent(phone)}`),
   // `bookingId` here is the booking's internal `id` (booking.id), not its
   // human-facing `bookingNumber` — the backend route only accepts the id.
   payBooking: (bookingId: string, input: PayBookingInput) =>

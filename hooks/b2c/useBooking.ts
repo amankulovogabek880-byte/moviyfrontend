@@ -16,6 +16,16 @@ export function useBooking(bookingNumber: string, contact: string | null | undef
   });
 }
 
+// Used by app/(b2c)/my-bookings/page.tsx — looks up every booking made
+// with a given phone number, no password required.
+export function useMyBookings(phone: string | null) {
+  return useQuery({
+    queryKey: ["b2c", "myBookings", phone],
+    queryFn: () => publicApi.getMyBookings(phone as string),
+    enabled: Boolean(phone),
+  });
+}
+
 export function useCreateBooking() {
   return useMutation({
     mutationFn: (input: CreateBookingInput) => publicApi.createBooking(input),

@@ -6,6 +6,7 @@ import { TourForm } from "@/components/admin/TourForm";
 import { DepartureEditor, DepartureDraftList } from "@/components/admin/DepartureEditor";
 import { PriceTiersEditor, RoomTypesEditor } from "@/components/admin/PricingOptionsEditor";
 import { AddOnsEditor } from "@/components/admin/AddOnsEditor";
+import { TourImagesEditor } from "@/components/admin/TourImagesEditor";
 import { TourVisibilityEditor } from "@/components/admin/TourVisibilityEditor";
 import { ErrorMessage } from "@/components/shared/ErrorMessage";
 import { Skeleton } from "@/components/shared/Skeleton";
@@ -108,6 +109,7 @@ export default function AdminTourEditPage() {
       )}
       {!isNew && tour && <RoomTypesEditor tourId={tour.id} roomTypes={tour.roomTypes ?? []} />}
       {!isNew && tour && <AddOnsEditor tourId={tour.id} addOns={tour.addOns ?? []} />}
+      {!isNew && tour && <TourImagesEditor tourId={tour.id} images={tour.images ?? []} />}
       {!isNew && tour && <TourVisibilityEditor tour={tour} />}
     </div>
   );

@@ -14,3 +14,14 @@ export const adminTeamMemberFormSchema = z.object({
 });
 
 export type AdminTeamMemberFormValues = z.infer<typeof adminTeamMemberFormSchema>;
+
+// Shared by both the admin (PATCH admin/me/change-password) and hamkor
+// (PATCH b2b/me/change-password) profile pages — see
+// hooks/admin/useMe.ts / hooks/b2b/useMe.ts and app/admin/profile,
+// app/b2b/profile.
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Joriy parolni kiriting"),
+  newPassword: z.string().min(8, "Kamida 8 belgi"),
+});
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;

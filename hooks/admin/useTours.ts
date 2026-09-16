@@ -112,6 +112,41 @@ export function useDeleteAddOn(tourId: string) {
   });
 }
 
+// Uploads a file to the backend's generic image-upload endpoint and
+// returns its public {url} — a separate step from actually attaching that
+// url to the tour (useAddTourImage below), matching how
+// components/admin/TourImagesEditor.tsx lets the admin either upload a
+// file or paste a URL directly into the same "add image" step.
+export function useUploadTourImage() {
+  return useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return proxyApi.postFormData<{ url: string }>("admin/uploads/tour-image", formData);
+    },
+  });
+}
+
+export function useAddTourImage(tourId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { url: string }) =>
+      proxyApi.post(`admin/tours/${encodeURIComponent(tourId)}/images`, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "tour", tourId] }),
+  });
+}
+
+export function useDeleteTourImage(tourId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (imageId: string) =>
+      proxyApi.delete(
+        `admin/tours/${encodeURIComponent(tourId)}/images/${encodeURIComponent(imageId)}`
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "tour", tourId] }),
+  });
+}
+
 export function useUpdateTourVisibility(tourId: string) {
   const queryClient = useQueryClient();
   return useMutation({

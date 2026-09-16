@@ -50,6 +50,12 @@ const uz: Dict = {
     reset: "Tozalash",
     add: "Qo'shish",
     reallyDeleteConfirm: "Rostdan ham davom etasizmi?",
+    currentPassword: "Joriy parol",
+    newPassword: "Yangi parol",
+    changePassword: "Parolni almashtirish",
+    passwordChanged: "Parol muvaffaqiyatli almashtirildi",
+    upload: "Yuklash",
+    uploading: "Yuklanmoqda...",
   },
   auth: {
     loginTitle: "Tizimga kirish",
@@ -64,7 +70,7 @@ const uz: Dict = {
     nav: {
       home: "Bosh sahifa",
       tours: "Turlar",
-      myBooking: "Mening bronim",
+      myBooking: "Mening bronlarim",
       partnerLogin: "Kirish",
     },
     home: {
@@ -162,6 +168,17 @@ const uz: Dict = {
       thankYouTitle: "Rahmat!",
       thankYouBody: "Sharhingiz moderatsiyadan so'ng saytda ko'rinadi.",
     },
+    myBookings: {
+      title: "Mening bronlarim",
+      hint: "Bron qilishda ko'rsatgan telefon raqamingizni kiriting.",
+      phonePlaceholder: "+998 90 123 45 67",
+      submit: "Qidirish",
+      searching: "Qidirilmoqda...",
+      empty: "Bu raqam bilan hech qanday bron topilmadi.",
+    },
+    footer: {
+      staffLogin: "Hamkorlar va xodimlar uchun kirish",
+    },
   },
   b2b: {
     brand: "Omon Travel Hamkor",
@@ -170,6 +187,7 @@ const uz: Dict = {
       tours: "Turlar",
       bookings: "Bronlar",
       team: "Xodimlarim",
+      profile: "Profil",
     },
     dashboard: {
       title: "Boshqaruv paneli",
@@ -208,6 +226,7 @@ const uz: Dict = {
     team: {
       title: "Xodimlarim",
       addMember: "Agent qo'shish",
+      addPassword: "Boshlang'ich parol",
       colName: "Ism",
       colEmail: "Email",
       colRole: "Rol",
@@ -222,6 +241,10 @@ const uz: Dict = {
       postpaidNotice:
         "Ushbu bron kredit hisobingizga yozildi, tasdiqlash uchun to'lov talab qilinmaydi.",
     },
+    profile: {
+      title: "Profil sozlamalari",
+      changePasswordTitle: "Parolni almashtirish",
+    },
   },
   admin: {
     brand: "Omon Travel Admin",
@@ -235,6 +258,7 @@ const uz: Dict = {
       reviews: "Sharhlar",
       auditLog: "Amallar tarixi",
       team: "Jamoa",
+      profile: "Profil",
     },
     dashboard: {
       title: "Boshqaruv paneli",
@@ -310,6 +334,12 @@ const uz: Dict = {
       addOnInactive: "Nofaol",
       waitlistButton: "Navbatdagilar",
       waitlistEmpty: "Navbatda hech kim yo'q",
+      images: "Rasmlar",
+      uploadImage: "Kompyuterdan rasm yuklash",
+      imageUrlLabel: "yoki rasm URL manzilini kiriting",
+      addImageUrl: "URL qo'shish",
+      imagesEmpty: "Hozircha rasm yo'q",
+      imageUploadError: "Rasm yuklashda xatolik yuz berdi",
     },
     partners: {
       title: "Hamkorlar",
@@ -330,8 +360,6 @@ const uz: Dict = {
       phoneLabel: "Telefon",
       discountLabel: "Chegirma foizi (%)",
       passwordLabel: "Boshlang'ich parol",
-      passwordAutoNote:
-        "Kirish uchun boshlang'ich parol hamkorning email manziliga avtomatik yuboriladi",
       suspend: "Faoliyatini to'xtatish",
       activate: "Qayta faollashtirish",
       bookingHistory: "Bronlar tarixi",
@@ -365,6 +393,7 @@ const uz: Dict = {
       employees: "Xodimlar",
       employeesAddName: "Ism",
       employeesAddEmail: "Email",
+      employeesAddPassword: "Boshlang'ich parol",
       employeesAddRole: "Rol",
       employeesAdd: "Xodim qo'shish",
       roleOwner: "Egasi (OWNER)",
@@ -485,6 +514,10 @@ const uz: Dict = {
       colAction: "Amal",
       colEntity: "Obyekt",
       colDate: "Sana",
+    },
+    profile: {
+      title: "Profil sozlamalari",
+      changePasswordTitle: "Parolni almashtirish",
     },
   },
   bookingStatus: {

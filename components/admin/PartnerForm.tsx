@@ -2,7 +2,11 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { partnerFormSchema, type PartnerFormValues } from "@/lib/schemas/partner";
+import {
+  partnerFormSchema,
+  createPartnerFormSchema,
+  type PartnerFormValues,
+} from "@/lib/schemas/partner";
 import { Input } from "@/components/shared/Input";
 import { Button } from "@/components/shared/Button";
 import { t } from "@/lib/i18n";
@@ -23,12 +27,16 @@ export function PartnerForm({
     handleSubmit,
     formState: { errors },
   } = useForm<PartnerFormValues>({
-    resolver: zodResolver(partnerFormSchema),
+    // New partners need a password (the backend no longer auto-generates
+    // and emails one); existing partners are edited without touching it —
+    // see lib/schemas/partner.ts.
+    resolver: zodResolver(isNew ? createPartnerFormSchema : partnerFormSchema),
     defaultValues: {
       companyName: "",
       contactPerson: "",
       email: "",
       discountPercent: 0,
+      ...(isNew ? { password: "" } : {}),
       ...defaultValues,
     },
   });
@@ -66,7 +74,13 @@ export function PartnerForm({
         {...register("discountPercent", { valueAsNumber: true })}
       />
       {isNew && (
-        <p className="text-sm text-muted">{t("admin.partnerForm.passwordAutoNote")}</p>
+        <Input
+          label={t("admin.partnerForm.passwordLabel")}
+          type="password"
+          autoComplete="new-password"
+          error={errors.password?.message}
+          {...register("password")}
+        />
       )}
       <Button type="submit" isLoading={isSubmitting} className="self-start">
         {t("admin.partnerForm.saveButton")}

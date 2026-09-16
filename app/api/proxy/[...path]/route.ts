@@ -10,14 +10,23 @@ function clearAuthCookies(res: NextResponse) {
   res.cookies.delete(ROLE_COOKIE);
 }
 
-function backendInit(method: string, accessToken: string, bodyText: string | null): RequestInit {
+function backendInit(
+  method: string,
+  accessToken: string,
+  body: BodyInit | null,
+  contentType: string | null
+): RequestInit {
   return {
     method,
     headers: {
-      "Content-Type": "application/json",
+      // Multipart file-upload bodies (see §5 / TourImagesEditor) carry
+      // their own `multipart/form-data; boundary=...` Content-Type —
+      // forcing `application/json` on those breaks the boundary and
+      // corrupts the upload. Everything else defaults to JSON like before.
+      "Content-Type": contentType ?? "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
-    ...(bodyText ? { body: bodyText } : {}),
+    ...(body ? { body } : {}),
   };
 }
 
@@ -68,14 +77,30 @@ async function handle(req: NextRequest, params: { path: string[] }) {
   const search = req.nextUrl.search;
   const url = `${BACKEND_URL}/${targetPath}${search}`;
 
+  const incomingContentType = req.headers.get("content-type");
+  const isMultipart = incomingContentType?.toLowerCase().startsWith("multipart/form-data") ?? false;
+
   // Read the body once so it can be replayed on a refresh-and-retry below —
-  // req.text() can only be consumed a single time.
-  const bodyText =
-    req.method !== "GET" && req.method !== "HEAD" ? (await req.text()) || null : null;
+  // req's body stream can only be consumed a single time. Multipart
+  // (file upload) bodies are read as raw bytes to stay binary-safe — a
+  // .text() decode/re-encode roundtrip corrupts them; everything else is
+  // read as text like before. An ArrayBuffer (unlike a stream) can safely
+  // be reused across the initial attempt and the refresh-retry fetch.
+  let body: BodyInit | null = null;
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    if (isMultipart) {
+      const buffer = await req.arrayBuffer();
+      body = buffer.byteLength ? buffer : null;
+    } else {
+      const text = await req.text();
+      body = text || null;
+    }
+  }
+  const forwardedContentType = isMultipart ? incomingContentType : null;
 
   let backendRes: Response;
   try {
-    backendRes = await fetch(url, backendInit(req.method, token, bodyText));
+    backendRes = await fetch(url, backendInit(req.method, token, body, forwardedContentType));
   } catch {
     return NextResponse.json({ message: "Backend bilan bog'lanib bo'lmadi" }, { status: 502 });
   }
@@ -87,7 +112,10 @@ async function handle(req: NextRequest, params: { path: string[] }) {
     if (refreshed) {
       let retryRes: Response;
       try {
-        retryRes = await fetch(url, backendInit(req.method, refreshed.accessToken, bodyText));
+        retryRes = await fetch(
+          url,
+          backendInit(req.method, refreshed.accessToken, body, forwardedContentType)
+        );
       } catch {
         retryRes = backendRes;
       }

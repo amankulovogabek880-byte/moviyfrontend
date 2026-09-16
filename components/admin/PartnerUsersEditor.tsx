@@ -33,12 +33,12 @@ export function PartnerUsersEditor({
     formState: { errors },
   } = useForm<PartnerUserFormValues>({
     resolver: zodResolver(partnerUserFormSchema),
-    defaultValues: { fullName: "", email: "", role: "AGENT" },
+    defaultValues: { fullName: "", email: "", password: "", role: "AGENT" },
   });
 
   async function onSubmit(values: PartnerUserFormValues) {
     await addUser.mutateAsync(values);
-    reset({ fullName: "", email: "", role: "AGENT" });
+    reset({ fullName: "", email: "", password: "", role: "AGENT" });
   }
 
   return (
@@ -97,6 +97,13 @@ export function PartnerUsersEditor({
           type="email"
           error={errors.email?.message}
           {...register("email")}
+        />
+        <Input
+          label={t("admin.partnerForm.employeesAddPassword")}
+          type="password"
+          autoComplete="new-password"
+          error={errors.password?.message}
+          {...register("password")}
         />
         <Select label={t("admin.partnerForm.employeesAddRole")} {...register("role")}>
           <option value="OWNER">{t("admin.partnerForm.roleOwner")}</option>

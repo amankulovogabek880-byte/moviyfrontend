@@ -13,6 +13,7 @@ import {
   RotateCcw,
   Star,
   UserCog,
+  UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/admin/refunds", label: "admin.nav.refunds", icon: RotateCcw },
   { href: "/admin/reviews", label: "admin.nav.reviews", icon: Star },
   { href: "/admin/audit-log", label: "admin.nav.auditLog", icon: History },
+  { href: "/admin/profile", label: "admin.nav.profile", icon: UserCircle },
 ];
 
 // §13: CONTENT_ADMIN loses financial/partner visibility, SUPER_ADMIN gains the team page.

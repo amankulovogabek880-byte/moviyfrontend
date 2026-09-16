@@ -15,8 +15,8 @@ export function Header() {
           <Link href="/tours" className="hover:text-accent">
             {t("b2c.nav.tours")}
           </Link>
-          <Link href="/login" className="text-muted hover:text-accent">
-            {t("b2c.nav.partnerLogin")}
+          <Link href="/my-bookings" className="text-muted hover:text-accent">
+            {t("b2c.nav.myBooking")}
           </Link>
         </nav>
       </div>

@@ -25,12 +25,12 @@ export default function B2BTeamPage() {
     formState: { errors },
   } = useForm<PartnerUserFormValues>({
     resolver: zodResolver(partnerUserFormSchema),
-    defaultValues: { fullName: "", email: "", role: "AGENT" },
+    defaultValues: { fullName: "", email: "", password: "", role: "AGENT" },
   });
 
   async function onSubmit(values: PartnerUserFormValues) {
     await addMember.mutateAsync(values);
-    reset({ fullName: "", email: "", role: "AGENT" });
+    reset({ fullName: "", email: "", password: "", role: "AGENT" });
   }
 
   if (meLoading) return <Skeleton className="h-64 w-full rounded-xl2" />;
@@ -93,6 +93,13 @@ export default function B2BTeamPage() {
             type="email"
             error={errors.email?.message}
             {...register("email")}
+          />
+          <Input
+            label={t("b2b.team.addPassword")}
+            type="password"
+            autoComplete="new-password"
+            error={errors.password?.message}
+            {...register("password")}
           />
           <Button type="submit" isLoading={addMember.isPending}>
             {t("b2b.team.addMember")}

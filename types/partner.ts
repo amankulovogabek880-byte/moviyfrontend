@@ -55,6 +55,7 @@ export interface PartnerUser {
 export interface PartnerUserFormInput {
   fullName: string;
   email: string;
+  password: string;
   role: PartnerUserRole;
 }
 
@@ -64,6 +65,9 @@ export interface PartnerFormInput {
   email: string;
   phone?: string;
   discountPercent: number;
+  // Required by the backend when creating a partner (see
+  // lib/schemas/partner.ts's createPartnerFormSchema); omitted on updates.
+  password?: string;
 }
 
 export interface PartnerFilters {
