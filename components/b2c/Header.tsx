@@ -18,6 +18,12 @@ export function Header() {
           <Link href="/booking/my-bookings" className="text-muted hover:text-accent">
             {t("b2c.nav.myBooking")}
           </Link>
+          <Link
+            href="/login"
+            className="rounded-lg border border-border px-3 py-1.5 text-muted hover:border-accent hover:text-accent"
+          >
+            {t("b2c.nav.partnerLogin")}
+          </Link>
         </nav>
       </div>
     </header>
